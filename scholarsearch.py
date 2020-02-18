@@ -1,7 +1,8 @@
 %load_ext autoreload
 %autoreload 2
 from bs4 import BeautifulSoup
-import urllib
+import urllib3
+import re
 from urllib.request import Request
 from urllib.parse import quote, unquote
 from typing import Union, List
@@ -31,7 +32,10 @@ class GoogleScholarParser:
             page = self.http.request('GET', search_url)
             self.soup = BeautifulSoup(page.data, 'html.parser')
             tag = self.soup.find_all(lambda tag: tag.name == "a" and "Cited by" in tag.text)[0]
-            print(tag.text)
+            cited_regex_string = "Cited by (\d+)"
+            regex_match = re.search(cited_regex_string, tag.text)
+            if regex_match:
+                return int(regex_match.group(1))
         except Exception as e:
             print("ERROR: " + repr(e))
         
